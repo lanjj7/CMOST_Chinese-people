@@ -1,3 +1,3 @@
-# CMOST_Chinese-people
-The updation of CMOST
+# CMOST_Chinese
+The updation of CMOST by Chinese data.
 The developer and source: https://github.com/poljan/CMOSTv2
