@@ -1,0 +1,313 @@
+这是 VII. Parameter optimization (VII. 参数优化) 章节的完整中英对照翻译。
+
+VII. Parameter optimization
+VII. 参数优化
+This section is specifically for advanced users, who would like to use their own benchmark parameters to create the CMOST settings file and to perform calculations using them. An early user wanting to reproduce the calculations with the default CMOST settings can ignore this section.
+本节专为高级用户设计，适用于想要使用自己的基准参数创建 CMOST 设置文件并利用它们进行计算的用户。想要使用默认 CMOST 设置重现计算的初级用户可以忽略本节。
+Parameterization approach: CMOST is a very detailed model with many different parameters. For example, the new polyp appearance is a sigmoid function parameterized by three parameters. The early polyp progression is assumed to be of Gaussian form and is parameterized by three additional parameters. Inclusion of all parameters used for describing the model would make it difficult if not impossible to obtain an automated parameter estimation.
+参数化方法：CMOST 是一个非常详细的模型，包含许多不同的参数。例如，新息肉的出现是一个由三个参数参数化的 S 形函数。早期息肉进展被假设为高斯形式（正态分布），并由另外三个参数参数化。包含用于描述模型的所有参数将使得获得自动参数估计变得困难，甚至不可能。
+In order to achieve the results in a quick way, two strategies were adopted –
+为了快速获得结果，采用了两种策略 ——
+* The comparison of the calculated results to benchmarks is made in four steps. It was observed during the calculations that these four-steps behaved almost independently of each other. Making this step-wise parameterization reduces the complexity from simultaneously optimizing twenty parameters to fewer parameters in each step.
+计算结果与基准的比较分四步进行。在计算过程中观察到，这四个步骤的表现几乎相互独立。进行这种分步参数化将复杂性从同时优化二十个参数降低到每一步优化较少的参数。
+* The parameter space was not explored with all possible combinations of the parameter values, but instead, in an initial step the parameters were corrected iteratively, depending on how far the calculated results were from the predictions. This greedy algorithm approach makes the exploration of the parameter space directed towards achieving the benchmarks provided. For some key parameters this is followed by a systematic unbiased search using the Nelder-Mead simplex algorithm.
+并未通过所有可能的参数值组合来探索参数空间，相反，在初始步骤中，根据计算结果与预测值的偏差程度，迭代地修正参数。这种贪婪算法方法使得参数空间的探索指向实现提供的基准。对于某些关键参数，随后使用 Nelder-Mead 单纯形算法进行系统的无偏搜索。
+While the biology of colorectal cancer is complicated, at a very simple level of description, colorectal cancer has two kinds of origins – adenomatous polyps that can be detected in a colonoscopy, and flat/ serrated polyps (or non-polyp lesions) that are hard to be detected by colonoscopy. The latter kind of lesions are accounted for by the “direct cancer” pathways, i.e. cancer without adenomatous precursors.
+虽然结直肠癌的生物学机制很复杂，但在非常简单的描述层面，结直肠癌有两种起源 —— 可以通过结肠镜检测到的腺瘤性息肉，以及通过结肠镜难以检测到的扁平/锯齿状息肉（或非息肉病变）。后一种病变由“直接癌变”途径解释，即没有腺瘤前体的癌症。
+Evolution from adenomas or without adenomas as well as the incidence of colorectal cancer defines the natural history of colorectal cancer, in the absence of any screening interventions.
+在没有任何筛查干预的情况下，从腺瘤演变或无腺瘤演变以及结直肠癌的发病率定义了结直肠癌的自然病史。
+Parameter calibration is done in 4 separate steps:
+参数校准分 4 个独立步骤进行：
+1. Early adenoma prevalence and distribution (早期腺瘤患病率和分布)
+2. Advanced adenoma prevalence and distribution (进展期腺瘤患病率和分布)
+3. Cancer incidence (癌症发病率)
+4. Direct cancer (直接癌变)
+Number and size (or stage) distribution of adenomas and cancer as a function of age and gender – observed either in colonoscopy studies or in autopsy studies are used as benchmarks. Direct cancer (step 4) is benchmarked in an indirect way using the data of a rectosigmoidoscopy randomized control trials.
+腺瘤和癌症的数量和大小（或分期）随年龄和性别的分布 —— 无论是在结肠镜研究还是尸检研究中观察到的 —— 都被用作基准。直接癌变（第 4 步）使用直乙结肠镜随机对照试验的数据以间接方式进行基准测试。
+
+VII.1. Step 1: Early adenomas
+VII.1. 步骤 1：早期腺瘤
+VII.1.1. Early adenoma benchmarks
+VII.1.1. 早期腺瘤基准
+(Image)
+* Left (overall): Prevalence of early adenoma overall (i.e. males and females). The number indicates the fraction of individuals with at least one (early or advanced) adenoma. To add another benchmark just add a new year and an adenoma prevalence. The sort button (lower right in this window) will sort all benchmarks according to age. Below all benchmarks are illustrated with a graph.
+左（整体）： 早期腺瘤的整体患病率（即男性和女性）。该数字表示至少患有一个（早期或进展期）腺瘤的个体比例。要添加另一个基准，只需添加一个新的年份和腺瘤患病率。排序按钮（此窗口右下角）将根据年龄对所有基准进行排序。下方用图表说明所有基准。
+* Second from left (male): As above, male population.
+左二（男性）： 同上，男性人群。
+* Middle (female): As above, female population.
+中间（女性）： 同上，女性人群。
+* Second from right – Multiple adenoma: Numbers indicate the fraction of individuals with exactly 1 adenoma, 2, 3, 4 adenomas or 5 or more adenomas. Here the population 55-74 years of age is considered.
+右二 – 多发腺瘤： 数字表示确切患有 1 个、2 个、3 个、4 个腺瘤或 5 个及以上腺瘤的个体比例。这里考虑的是 55-74 岁的人群。
+* Right graph - Distribution of adenoma stage: Distribution of adenoma stages (i.e. fraction or percentage of adenomas at a given stage (i.e. 3mm, 5mm, 7mm, 9mm).
+右图 - 腺瘤分期分布： 腺瘤分期的分布（即给定分期（如 3mm、5mm、7mm、9mm）的腺瘤比例或百分比）。
+* Technical comment: for optimization step 1 only adenoma stages I-IV are considered (the sum of the number adenoma stages I-IV is used as 100%); for optimization step 2 only adenoma V and VI will be considered.
+技术说明： 对于优化步骤 1，仅考虑腺瘤分期 I-IV（使用腺瘤分期 I-IV 的总和作为 100%）；对于优化步骤 2，将仅考虑腺瘤 V 和 VI。
+* Sort: sort benchmarks according to age.
+Sort（排序）： 根据年龄对基准进行排序。
+* Return: return to main window.
+Return（返回）： 返回主窗口。
+VII.1.2. Optimizing early adenomas
+VII.1.2. 优化早期腺瘤
+(Image)
+CMOST will try to optimize overall, male and female adenoma prevalence, distribution of multiple adenomas within the population and adenoma stage distribution I-IV.
+CMOST 将尝试优化整体、男性和女性的腺瘤患病率，人群中多发腺瘤的分布以及腺瘤分期分布 I-IV。
+In the first set of iterations heuristic, customized algorithms will be used to approach an optimum. In the second set of algorithm a Nelder-Mead simplex algorithm will be used to refine this optimum. After an optimum is found the user will be asked, whether the parameters found should be kept.
+在第一组迭代中，将使用启发式、定制算法来逼近最优值。在第二组算法中，将使用 Nelder-Mead 单纯形算法来微调该最优值。找到最优值后，将询问用户是否保留找到的参数。
+* 1st iteration: number of calculations for first set of iteration (heuristic algorithms).
+第 1 次迭代： 第一组迭代（启发式算法）的计算次数。
+* 2nd iteration: number of calculations for second set of iteration (Nelder-Mead).
+第 2 次迭代： 第二组迭代（Nelder-Mead）的计算次数。
+* Start: start optimization procedure.
+Start： 开始优化过程。
+* Stop: stop optimization procedure (the current run will be finished).
+Stop： 停止优化过程（当前运行将完成）。
+* Return: return to main window.
+Return： 返回主窗口。
+* Technical comment 1:
+技术说明 1：
+For adenoma prevalence the age dependent new adenoma rate is adjusted (3 coefficients of a sigmoid curve, see manuscript). In addition, CMOST adjusts a scaling factor for adenoma appearance in females to minimize the differences to the benchmarks in males and females.
+对于腺瘤患病率，调整年龄相关的新腺瘤发生率（S 形曲线的 3 个系数，见手稿）。此外，CMOST 调整女性腺瘤出现的比例因子，以最小化男性和女性基准的差异。
+For distribution of multiple adenomas the distribution of individual risks for the population is adjusted.
+对于多发腺瘤的分布，调整人群的个体风险分布。
+For the adenoma stage distribution, the stage specific adenoma progression rates are adjusted according to the square root of the ratio of observed vs. expected relative prevalence.
+对于腺瘤分期分布，根据观察到的与预期的相对患病率之比的平方根来调整分期特定的腺瘤进展率。
+* Technical comment 2:
+技术说明 2：
+Using these benchmarks, the following two internal vectors are adjusted:
+使用这些基准，调整以下两个内部向量：
+New polyp appearance, which is a vector with the relative likelihood of appearance of adenomas for each year between ages 0 and 99.
+新息肉出现 (New polyp appearance)，这是一个包含 0 到 99 岁之间每年腺瘤出现相对可能性的向量。
+Individual Risk (vector with 500 numbers): This vector determines the distribution of individual risks. This distribution might be flat (i.e. very similar cancer and adenoma risks between individuals) or steep (i.e. uneven, highly different adenoma and carcinoma risks). CMOST assumes each simulated individual to have a person specific risk for adenoma appearance. This individual risk is drawn from a distribution of these 500 numbers. This risk may be due to heredity, nutrition, or other factors. A distribution of individual risks is calculated and benchmarked using the distribution of multiple adenomas (a high frequency of multiple adenomas can only be achieved if an uneven distribution of individual risks are assumed (i.e., many high-risk individuals compared to average).
+个体风险 (Individual Risk)（包含 500 个数字的向量）：此向量决定个体风险的分布。这种分布可能是平坦的（即个体之间的癌症和腺瘤风险非常相似）或陡峭的（即不均匀的，高度不同的腺瘤和癌症风险）。CMOST 假设每个模拟个体具有特定于人的腺瘤出现风险。该个体风险是从这 500 个数字的分布中抽取的。这种风险可能源于遗传、营养或其他因素。通过使用多发腺瘤的分布对个体风险分布进行计算和基准测试（只有假设个体风险分布不均匀（即高风险个体多于平均水平），才能实现高频率的多发腺瘤）。
+
+VII.2. Step 2: Advanced adenomas
+VII.2. 步骤 2：进展期腺瘤
+VII.2.1. Advanced adenoma benchmarks
+VII.2.1. 进展期腺瘤基准
+(Image)
+* Left: prevalence of advanced adenomas (percentage of individuals with at least 1 advanced adenoma 1cm or 2cm; i.e. P5 or P6).
+左： 进展期腺瘤患病率（至少患有 1 个 1cm 或 2cm 进展期腺瘤，即 P5 或 P6 的个体的百分比）。
+* Middle left: same as above, male population.
+左中： 同上，男性人群。
+* Middle right: same as above, female population.
+右中： 同上，女性人群。
+* Right: distribution of adenoma, compare Benchmarks Step 1, above.
+右： 腺瘤分布，比较上述步骤 1 的基准。
+* Sort: will sort benchmarks according to the year.
+Sort： 将根据年份对基准进行排序。
+VII.2.2. Optimizing advanced adenomas
+VII.2.2. 优化进展期腺瘤
+(Image)
+General strategy: CMOST will optimize overall, male and female advanced adenoma prevalence, and adenoma stage distribution of advanced adenomas (P5: advanced adenoma >1cm or advanced histology, P6: advanced adenoma >2cm).
+总体策略：CMOST 将优化整体、男性和女性的进展期腺瘤患病率，以及进展期腺瘤（P5：进展期腺瘤 >1cm 或高级组织学特征，P6：进展期腺瘤 >2cm）的分期分布。
+In the first set of iterations customized heuristic algorithms will be used to approach an optimum. In the second set of algorithm a Nelder-Mead simplex algorithm will be used to refine this optimum. After an optimum is found the user will be asked, whether the parameters found should be kept.
+在第一组迭代中，将使用定制的启发式算法来逼近最优值。在第二组算法中，将使用 Nelder-Mead 单纯形算法来微调该最优值。找到最优值后，将询问用户是否保留找到的参数。
+In addition, a scaling factor for adenoma progression for females will be adjusted to account for different advanced adenoma distributions for females and males. This scaling factor is not reported.
+此外，将调整女性腺瘤进展的比例因子，以解释女性和男性不同的进展期腺瘤分布。该比例因子不予报告。
+* 1st iteration: number of calculations for first set of iterations.
+第 1 次迭代： 第一组迭代的计算次数。
+* 2nd iteration: number of calculations for second set of iterations.
+第 2 次迭代： 第二组迭代的计算次数。
+* Adjust Adv. Adenoma, Adjust adenoma distribution: adjustments can be activated/ inactivated separately.
+Adjust Adv. Adenoma（调整进展期腺瘤），Adjust adenoma distribution（调整腺瘤分布）： 调整功能可单独激活/停用。
+* Start: start optimization procedure.
+Start： 开始优化过程。
+* Stop: stop optimization procedure (the current run will be finished).
+Stop： 停止优化过程（当前运行将完成）。
+* Return: return to main window.
+Return： 返回主窗口。
+* Technical comments:
+技术说明：
+For advanced adenoma prevalence the age dependent early adenoma progression rate is adjusted (3 coefficients of a Gaussian curve, see manuscript). In addition, CMOST adjusts a correction factor for adenoma appearance in females to minimize the differences to the benchmarks in males and females.
+对于进展期腺瘤患病率，调整年龄相关的早期腺瘤进展率（高斯曲线的 3 个系数，见手稿）。此外，CMOST 调整女性腺瘤出现的修正因子，以最小化男性和女性基准的差异。
+For the adenoma stage distribution P5/ P6 the stage specific adenoma progression rates is adjusted according to the square root of the ratio of observed vs. expected relative prevalence.
+对于腺瘤分期分布 P5/P6，根据观察到的与预期的相对患病率之比的平方根来调整分期特定的腺瘤进展率。
+
+VII.3. Step 3: Optimizing cancer
+VII.3. 步骤 3：优化癌症参数
+VII.3.1. Benchmarks for cancer optimization
+VII.3.1. 癌症优化的基准
+(Image)
+* Left: incidence of carcinoma whole population.
+左： 整个人群的癌症发病率。
+* Middle left: same as above, male population.
+左中： 同上，男性人群。
+* Middle right: same as above, female population.
+右中： 同上，女性人群。
+* Upper right - relative danger of adenoma. This parameter is benchmarked reversely; we estimate that the indicated fraction of carcinoma were derived from an adenoma of the indicated stage. For instance, 1% of all carcinoma originated directly within an adenoma of 9mm size (stage IV = P4), skipping the P5 stage (>1cm) and the P6 stage (>2cm).
+右上 - 腺瘤相对危险度。 该参数反向进行基准测试；我们估计所示比例的癌症源自所示分期的腺瘤。例如，1% 的癌症直接起源于 9mm 大小的腺瘤（分期 IV = P4），跳过了 P5 分期（>1cm）和 P6 分期（>2cm）。
+* Lower right – fraction of rectum carcinoma: A disproportionate fraction of carcinoma is observed in the rectum. Benchmarks can be added for adjustment of the fraction of rectum carcinoma (only the second and the third benchmark, i.e. the 5 year span around year 62 and 72 will be used).
+右下 - 直肠癌比例： 在直肠中观察到不成比例的癌症。可以添加基准以调整直肠癌的比例（仅使用第 62 年和第 72 年左右各 5 年跨度的第二个和第三个基准）。
+* Sort: will sort incidence benchmarks according to the year.
+Sort： 将根据年份对发病率基准进行排序。
+* Return: return to main window.
+Return： 返回主窗口。
+VII.3.1. Optimizing cancer parameters
+VII.3.1. 优化癌症参数 (注：原文档编号重复)
+(Image)
+General strategy: CMOST will optimize overall, male and female carcinoma adenoma prevalence, the relative danger of adenomas (i.e. the fraction of carcinomas derived from each type of adenomas other than P6-adenoma (>2cm)) and the fraction of rectum carcinoma.
+总体策略：CMOST 将优化整体、男性和女性的癌症患病率、腺瘤相对危险度（即源自 P6 腺瘤（>2cm）以外各类腺瘤的癌症比例）以及直肠癌的比例。
+In the first set of iterations customized heuristic algorithms will be used to approach an optimum. In the second set of algorithm a Nelder-Mead simplex algorithm will be used to refine this optimum. After an optimum is found the user will be asked, whether the parameters found should be kept.
+在第一组迭代中，将使用定制的启发式算法来逼近最优值。在第二组算法中，将使用 Nelder-Mead 单纯形算法来微调该最优值。找到最优值后，将询问用户是否保留找到的参数。
+* 1st iteration: number of calculations for first set of iteration.
+第 1 次迭代： 第一组迭代的计算次数。
+* 2nd iteration: number of calculations for second set of iteration.
+第 2 次迭代： 第二组迭代的计算次数。
+* Adjust fraction rectum, Adjust cancer, Adjust relative danger adenoma: adjustments can be activated/ inactivated separately.
+Adjust fraction rectum（调整直肠比例），Adjust cancer（调整癌症），Adjust relative danger adenoma（调整腺瘤相对危险度）： 调整功能可单独激活/停用。
+* Start: start optimization procedure.
+Start： 开始优化过程。
+* Stop: stop optimization procedure (the current run will be finished).
+Stop： 停止优化过程（当前运行将完成）。
+* Return: return to main window.
+Return： 返回主窗口。
+* Technical comments:
+技术说明：
+For carcinoma incidence the age dependent advanced adenoma progression rate is adjusted (3 coefficients of a Gaussian curve, see manuscript). In addition, CMOST adjusts a correction factor for advanced adenoma progression in females to minimize the differences to the benchmarks in males and females.
+对于癌症发病率，调整年龄相关的进展期腺瘤进展率（高斯曲线的 3 个系数，见手稿）。此外，CMOST 调整女性进展期腺瘤进展的修正因子，以最小化男性和女性基准的差异。
+For the relative danger adenoma a conversion factor for each type of adenoma is adjusted according to the square root of the ratio of observed vs. expected relative prevalences.
+对于腺瘤相对危险度，根据观察到的与预期的相对患病率之比的平方根来调整各类腺瘤的转换因子。
+For adjusting the fraction of rectum carcinoma the location specific progression rate of rectum adenomas (early and advanced) will be adjusted.
+对于调整直肠癌的比例，将调整直肠腺瘤（早期和进展期）的部位特定进展率。
+
+VII.4. Step 4: Adjusting direct cancer
+VII.4. 步骤 4：调整直接癌变
+VII.4.1. Benchmarks for adjusting direct cancer
+VII.4.1. 调整直接癌变的基准
+(Image)
+* Incidence reduction overall: incidence reduction by sigmoidoscopy screening. This parameter will be used for benchmarking.
+整体发病率降低： 通过乙状结肠镜筛查降低发病率。此参数将用于基准测试。
+* Incidence reduction right/ left, mortality reduction: the respective outcomes in the rectosigmoidoscopy study. These parameters are not used for benchmarking.
+右/左侧发病率降低，死亡率降低： 直乙结肠镜研究中的相应结果。这些参数不用于基准测试。
+* Comment: due to specific differences in the rectosigmoidoscopy studies (i.e. age of population, 1 or 2 screening interventions (Schoen et al., NEJM 2012), adherence to screening etc.) incidence reduction only makes sense in connection with the selection of the study (see VII.4.1., below).
+注释： 由于直乙结肠镜研究的具体差异（即人群年龄、1 或 2 次筛查干预（Schoen et al., NEJM 2012）、筛查依从性等），发病率降低仅在与研究选择相结合时才有意义（见下文 VII.4.1.）。
+VII.4.1. Optimizing direct cancer parameters
+VII.4.1. 优化直接癌变参数 (注：原文档编号重复)
+(Image)
+General strategy: CMOST uses data from randomized controlled rectosigmoidoscopy studies for the adjustment of direct cancer. Direct cancer is assumed to be localized mainly in the right-sided colon, modeled by a sigmoid curve (see manuscript). CMOST adjusts only the maximum of this sigmoid curve. Thereby, the variable “DirectCancerSpeed” (direct cancer variable) will be adjusted using the square root of the expected vs. observed incidence reduction rates for overall carcinoma.
+总体策略：CMOST 使用来自随机对照直乙结肠镜研究的数据来调整直接癌变。直接癌变被假设主要位于右半结肠，通过 S 形曲线建模（见手稿）。CMOST 仅调整该 S 形曲线的最大值。因此，将使用预期与观察到的整体癌症发病率降低率之比的平方根来调整变量“DirectCancerSpeed”（直接癌变变量）。
+* Graph incidence reduction: for the calculations the trends in incidence reduction overall (yellow), incidence reduction left colon (blue) and incidence reduction right colon (red) are indicated.
+发病率降低图表： 计算中显示整体发病率降低（黄色）、左半结肠发病率降低（蓝色）和右半结肠发病率降低（红色）的趋势。
+* Graph direct cancer variable: Trends in the variable “DirectCancerSpeed” are indicated.
+直接癌变变量图表： 显示变量“DirectCancerSpeed”的趋势。
+* Max. iterations: Number of iterations
+Max. iterations： 迭代次数。
+* Number averaging: At the end of the calculations the last n individual direct cancer speeds will be averaged (to reduce noise) and the resulting number used further on.
+Number averaging（平均数）： 在计算结束时，将对最后 n 个单独的直接癌变速度进行平均（以减少噪声），并将结果用于后续。
+* Scenario: 3 scenarios are modeled by CMOST, the user can choose either: “Atkin et al., Lancet 2010”, “Schoen et al., NEJM 2012”, “Holme et al., JAMA 2014” or “Segnan, JNCI 2011”.
+Scenario（场景）： CMOST 模拟 3 种场景，用户可以选择：“Atkin et al., Lancet 2010”、“Schoen et al., NEJM 2012”、“Holme et al., JAMA 2014”或“Segnan, JNCI 2011”。
+* Start: start calculations
+Start： 开始计算
+* Stop: stop calculations (the current run will be finished)
+Stop： 停止计算（当前运行将完成）
+* Return: return to main window
+Return： 返回主窗口
+
+VII.5. Suggested scheme for automated calibration
+VII.5. 自动校准的建议方案
+We suggest to run all 4 optimization steps sequentially and adjust the number of trials and the size of the patient population:
+我们建议按顺序运行所有 4 个优化步骤，并调整试验次数和患者人群规模：
+* Step 1: 25’000 patients, 10 trials first iteration, 30 trials second iteration
+步骤 1： 25,000 名患者，第一次迭代 10 次试验，第二次迭代 30 次试验
+* Step 2: 50’000 patients, 30 trials first iteration, 60 trials second iteration
+步骤 2： 50,000 名患者，第一次迭代 30 次试验，第二次迭代 60 次试验
+* Step 3: 100’000 patients, 50 trials first iteration, 60 trials second iteration
+步骤 3： 100,000 名患者，第一次迭代 50 次试验，第二次迭代 60 次试验
+* Step 4: 100’000 patients, 30 trials first iteration, averaging the last 10 iterations
+步骤 4： 100,000 名患者，第一次迭代 30 次试验，平均最后 10 次迭代结果
+Comments:
+注释：
+Variables will only be transferred if the user applies the “Return” button in each window, not simply by closing the windows.
+只有当用户在每个窗口中点击“Return”按钮时，变量才会被传输，仅关闭窗口不会传输。
+Calculations for step 1 and 2 will be fast. Step 3 can take one hour. If calculations are excessively slow please check that the coder option has been appropriately used (section VII).
+步骤 1 和 2 的计算速度很快。步骤 3 可能需要一小时。如果计算过慢，请检查是否正确使用了 coder 选项（第 VII 节）。
+
+VII.6. Alternative strategy for Step 4, adjustment of direct cancer
+VII.6. 步骤 4 的替代策略（调整直接癌变）
+Since simulation of even a population as large as 100’000 results in some noise in the data, we designed another way to adjust direct cancer. Thereby the “direct cancer variable” will be systematically varied to span the range of reasonable values with a selected number of repeats; results will be averaged and the most appropriate value used.
+由于即使模拟 100,000 人的人群也会产生一些数据噪声，我们设计了另一种调整直接癌变的方法。由此，“直接癌变变量”将在合理的数值范围内系统地变化，并进行选定次数的重复；结果将被平均，并使用最合适的值。
+Load the settings for which you want to adjust the direct cancer variable.
+加载您想要调整直接癌变变量的设置。
+Menu Option
+菜单选项
+autocalibration step 4 rectosigmo
+Automatic RS tests writing
+You will be able to choose the number of repeats. For the settings calculated for CMOST we used 25 repeats, resulting in 15x25 = 375 calculations.
+您可以选择重复次数。对于 CMOST 的计算设置，我们使用了 25 次重复，导致 15x25 = 375 次计算。
+Calculations can be done on a Linux cluster (recommended, see section VII.2) or using the Starter Option (Section VII.1).
+计算可以在 Linux 集群上进行（推荐，见第 VII.2 节 译者注：集群设置实为第 IX.2 节）或使用 Starter 选项（第 VII.1 节 译者注：Starter 选项实为第 IX.1 节）。
+After calculations are finished, results can be summarized:
+计算完成后，可以汇总结果：
+Menu Option
+菜单选项
+autocalibration step 4 rectosigmo
+Automatic RS tests reading
+Results might look as follows:
+结果可能如下所示：
+(Image)
+In the plot above, results of an individual repeat are shown in blue, the averaged value in red, the trendline is indicated by a blue line. The benchmark for overall incidence reduction is indicated by a thin blue line. The point where the both lines cross is calculated and the best value for cancer variable extracted.
+在上图中，单次重复的结果显示为蓝色，平均值显示为红色，趋势线由蓝线指示。整体发病率降低的基准由细蓝线指示。计算两条线的交叉点，并提取最佳癌症变量值。
+The user will be asked, whether the calculated Cancer variable should be kept, if yes it will be replaced in the settings.
+将询问用户是否应保留计算出的 Cancer 变量，如果是，它将替换设置中的值。
+
+VII.7. Concomitant adjustment of Steps 1-3
+VII.7. 步骤 1-3 的同步调整
+Steps 1-3 can be run subsequently (see above) with graphical representation of key parameters. However, CMOST also supports optimization of Steps 1-3 in a single procedure. This can be done from the CMOST Main window or on the cluster.
+步骤 1-3 可以按顺序运行（见上文），并带有关键参数的图形表示。但是，CMOST 也支持在一个过程中优化步骤 1-3。这可以从 CMOST 主窗口或在集群上完成。
+Menu Option
+菜单选项
+Calibration step 1, 2, 3
+Autocalibration step 123
+The current settings will be used as a starting point. CMOST will perform the following steps:
+当前设置将用作起点。CMOST 将执行以下步骤：
+* Step 1: With population size 25’000, 10 and 30 repeats for the first and second set of iterations, respectively.
+步骤 1： 人群规模 25,000，第一组和第二组迭代分别为 10 次和 30 次重复。
+* Step 2: With population size 50’000, 30 and 60 repeats for the first and second set of iterations, respectively.
+步骤 2： 人群规模 50,000，第一组和第二组迭代分别为 30 次和 60 次重复。
+* Step 3: With population size 100’000, 30 and 60 repeats for the first and second set of iterations, respectively.
+步骤 3： 人群规模 100,000，第一组和第二组迭代分别为 30 次和 60 次重复。
+* Step 2+3 with population size 100’000, 100 iterations.
+步骤 2+3： 人群规模 100,000，100 次迭代。
+CMOST will start running the calculations; no graphical output is provided. The results of the calculations will be put back to CMOST main window. Calculations might need several hours. For best results we suggest performing this automated calibration on a Linux cluster; thereby, several calculations can be run in parallel (see section X.2).
+CMOST 将开始运行计算；不提供图形输出。计算结果将传回 CMOST 主窗口。计算可能需要几个小时。为了获得最佳结果，我们建议在 Linux 集群上执行此自动校准；由此，可以并行运行多个计算（见第 X.2 节 译者注：原文引用 X.2，实际应为 IX.2）。
+Note: For the combination of step 2 + 3 the Nelder-Mead simplex algorithm will be used only. It can be useful to achieve even more precise fitting since some interferences between steps 2 and 3 are present. This combined mode is not available with a graphical user interphase.
+注：对于步骤 2+3 的组合，将仅使用 Nelder-Mead 单纯形算法。这对于实现更精确的拟合很有用，因为步骤 2 和 3 之间存在一些干扰。此组合模式在图形用户界面中不可用。
+We also developed automated calibration using bootstrapping. Thereby, for each settings parameter an artificial population with the size of the original study (source data) with the same distribution of the parameter as in the original study (source data) will be generated. For each parameter individuals will be randomly drawn and a new study population is generated (with the size of the original study). Since each individual can be drawn more than once, some fluctuation of each parameter will be present. Bootstrapping addresses the uncertainty of calculations. Bootstrapping has not been sufficiently tested and usage is currently not recommended.
+我们还开发了使用自助法（bootstrapping）的自动校准。由此，对于每个设置参数，将生成一个与原始研究（源数据）规模相同且参数分布相同的人工人群。对于每个参数，将随机抽取个体并生成一个新的研究人群（规模与原始研究相同）。由于每个个体可能被抽取多次，因此每个参数将存在一些波动。自助法解决了计算的不确定性。自助法尚未经过充分测试，目前不建议使用。
+
+VII.8. Manual adjustments
+VII.8. 手动调整
+(Image)
+CMOST also supports visualization and manual adjustment of all parameters. This would be an alternative strategy to automated calibration. The user would need to manually change parameters in this window, press Return to transfer parameters to main window and press Start in the main window, followed by inspection of the matlab figures or .pdf files. With experience, with 30-50 iterations good agreement of all parameters can be achieved.
+CMOST 还支持所有参数的可视化和手动调整。这将是自动校准的替代策略。用户需要在此窗口中手动更改参数，按 Return 键将参数传输到主窗口，然后在主窗口中按 Start，随后检查 Matlab 图表或 .pdf 文件。凭借经验，通过 30-50 次迭代可以实现所有参数的良好一致性。
+Manual calibration results in slightly better agreement with benchmarks and ultimately provides an intuitive understanding of the model parameters. However, we recommended the objective approach provided by the automated calibration.
+手动校准可使结果与基准稍微更一致，并最终提供对模型参数的直观理解。但是，我们推荐自动校准提供的客观方法。
+* New polyp rate: for each increment of 5 years an age-specific adenoma appearance rate can be entered. CMOST will interpolate the rates for the years in between.
+新息肉率 (New polyp rate)： 每增加 5 年，可以输入一个年龄特定的腺瘤出现率。CMOST 将插值计算中间年份的比率。
+Technical comment: for the automated settings a sigmoid curve with 3 parameters is assumed and the individual points will be calculated.
+技术说明： 对于自动设置，假设具有 3 个参数的 S 形曲线，并将计算个别点。
+* Early polyp progression: as for new polyp, only the age specific early adenoma progression rate can be adjusted.
+早期息肉进展 (Early polyp progression)： 与新息肉一样，只能调整年龄特定的早期腺瘤进展率。
+* Advanced polyp progression: as for new polyp, only the age specific advanced adenoma progression rate can be adjusted.
+进展期息肉进展 (Advanced polyp progression)： 与新息肉一样，只能调整年龄特定的进展期腺瘤进展率。
+* Direct cancer: The age specific direct cancer rate can be adjusted separately for males and for females. For the settings provided by the authors, the direct cancer rate follows the cancer incidence benchmarks. Direct cancer refers to cancer without adenomatous precursors.
+直接癌变 (Direct cancer)： 年龄特定的直接癌变率可以针对男性和女性分别调整。对于作者提供的设置，直接癌变率遵循癌症发病率基准。直接癌变是指没有腺瘤前体的癌症。
+Technical comment: The probability of direct cancer will be the result of the direct cancer rate and “direct cancer speed”. In the current settings the direct cancer rate equals the carcinoma incidence.
+技术说明： 直接癌变的概率将是直接癌变率和“直接癌变速度（direct cancer speed）”的结果。在当前设置中，直接癌变率等于癌发病率。
+* Progression: adenoma stage specific progression rates can be adjusted. These rates determine the probability of progression for instance from a polyp 5mm (stage II, P2) to a polyp 7mm (stage III, P3).
+进展 (Progression)： 可以调整腺瘤分期特定的进展率。例如，这些比率决定了从息肉 5mm（分期 II，P2）进展到息肉 7mm（分期 III，P3）的概率。
+Technical comment: The rate of actual progression will be the product of stage-specific progression rate, age-specific early or advanced adenoma progression rate, gender-specific correction factor and a location specific correction factor.
+技术说明： 实际进展率将是分期特定进展率、年龄特定早期或进展期腺瘤进展率、性别特定修正因子和部位特定修正因子的乘积。
+* Fast cancer: Refers to cancer directly derived from adenoma stages other than P6 (advanced adenoma >2cm). The probabilities of conversion to cancer for each adenoma stage can be adjusted here (very low for small adenomas and relevant only for large adenomas P5, >1cm).
+快速癌变 (Fast cancer)： 指直接源自 P6（进展期腺瘤 >2cm）以外腺瘤分期的癌症。每个腺瘤分期转化为癌症的概率可以在此窗口中调整（对于小腺瘤非常低，仅对于大腺瘤 P5、>1cm 有意义）。
+* Healing: CMOST assumes a low probability of adenoma regression, to be adjusted in this windows. Adenoma healing is not calibrated.
+愈合 (Healing)： CMOST 假设腺瘤消退的概率很低，在此窗口中调整。腺瘤愈合未进行校准。
+* Female gender: Correction factors to control for the fraction of females within the general population (at birth), appearance of new adenoma, progression of early adenoma and progression of advanced adenoma.
+女性性别 (Female gender)： 修正因子，用于控制普通人群（出生时）中女性的比例、新腺瘤出现、早期腺瘤进展和进展期腺瘤进展。
+* Direct cancer speed: allows for adjusting the fraction of direct cancer (i.e. without adenomatous precursors) in the population.
+直接癌变速度 (Direct cancer speed)： 允许调整人群中直接癌变（即无腺瘤前体）的比例。
+VII.9. Default benchmarks
+VII.9. 默认基准数据
+No new window will open, but all benchmarks will be reverted to the default settings provided by the authors.
+不会打开新窗口，但所有基准将恢复为作者提供的默认设置。
+
